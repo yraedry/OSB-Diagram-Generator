@@ -1,8 +1,6 @@
 from os import path
 from utils.logger_config import LoggerConfig as log_config
 import logging
-import re
-from graphviz import Digraph
 from utils import basic_utils
 from drawpyo.diagram_types import TreeDiagram, NodeObject
 

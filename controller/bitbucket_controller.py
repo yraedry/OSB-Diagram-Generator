@@ -5,9 +5,7 @@ from utils import basic_utils
 from controller.api.bitbucket import BitBucketApi
 from controller.diagrams.osb_simple_diagram_controller import OsbSimpleDiagramController
 import logging
-import json
 import xml.etree.ElementTree as ET
-import re
 
 # Inicializamos el logger
 log_config.setup_logging()
@@ -79,10 +77,6 @@ class BitBucketController:
         for component in components:
             response_api = request_bitbucket.call_bitbucket_api(f'/{repo}/browse/{component}?limit=999999')
             response_to_xml = basic_utils.response_json_to_xml(response_api)
-            # response_json = json.dumps(response_api, ensure_ascii=False)
-            # pattern = r'"}], ".*?}'
-            # response_to_xml = response_json.replace('{"lines": [{"text": "', '').replace('"}, {"text": "', '').replace('\\', '')
-            # response_to_xml = basic_utils.delete_with_pattern(pattern, response_to_xml)
             response_xml = ET.fromstring(response_to_xml).find(".//{http://www.bea.com/wli/sb/services}invoke")
             pipeline_path_name = response_xml.attrib['ref']
             proxy_components_relations[component] = f'{pipeline_path_name}.pipeline'
