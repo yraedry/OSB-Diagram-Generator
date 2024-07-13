@@ -1,0 +1,8 @@
+requests
+customtkinter
+configparser
+tk
+pillow==10.1.0
+matplotlib==3.7.1
+typing-extensions
+drawpyo
