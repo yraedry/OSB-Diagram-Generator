@@ -13,9 +13,9 @@ def delete_extension(file_path):
     return file_name
 
 def get_last_part_value_from_character(character, file_path):
-    find_charater = file_path.rfind(character)
+    find_character = file_path.rfind(character)
     length_path = len(file_path)
-    file_name = file_path[find_charater + 1:length_path]
+    file_name = file_path[find_character + 1:length_path]
     return file_name
 
 def get_complete_file_name(file_path):

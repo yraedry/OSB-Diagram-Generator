@@ -5,7 +5,6 @@ from requests.auth import HTTPBasicAuth
 import logging
 from utils import basic_utils
 
-# Inicializamos el logger
 log_config.setup_logging()
 logger = logging.getLogger(__name__)
 
@@ -14,11 +13,10 @@ class BitBucketController:
         self.url = url
     
     def call_bitbucket_api(self, url):
-        # Metodo para hacer llamadas a la api de bitbucket de forma generica
         basic = HTTPBasicAuth(property_config.read_properties('CredentialSection', 'credential.user'), property_config.read_properties('CredentialSection', 'credential.tokenApi'))
         is_proxy_enabled = property_config.read_properties('ProxySection', 'proxy.enabled')
         try:
-            # Eliminamos el warning HTTP
+            # Delete HTTP Warnings
             requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
             if is_proxy_enabled != 'false':
                 proxies = {
@@ -52,5 +50,5 @@ class BitBucketController:
                 second_response_to_xml = basic_utils.response_json_to_xml(second_api_request)
                 response_api = f'{response_api}{second_response_to_xml}'
         except:
-            logger.error('found error in service, continue with erros')
+            logger.error('found error in service, continue with errors')
         return response_api

@@ -1,38 +1,34 @@
+# OSB-DIAGRAM-GENERATOR
 
-# CrossReferences-SOA-Viewer
-
-A brief description of what this project does and who it's for
-
+osb-diagram-generator is a python library developed to generate uml diagrams in draw.io format of osb services and their references to quickly obtain documentation.
 
 ## Installation
 
-Install my-project with npm
+this library has as dependencies the external libraries.
+
+- requests==2.32.3
+- configparser==7.0.0
+- drawpyo==0.1.3
+- gitpython==3.1.43
+
+for installation you must run:
 
 ```bash
-  pip install -r requirements.txt
-  docker build -t osb-crossreferences .
-  docker run -i -t CONTAINER-ID /bin/bash
-  docker run -i -t c9815ac263df python main.py
-```
-    
-## Deployment
-
-To deploy this project run
-
-```bash
-  npm run deploy
+pip install -r requirements.txt
 ```
 
-
-## Demo
-
-Insert gif or link to demo
+## Usage
 
 
-## Environment Variables
+```
 
-To run this project, you will need to add the following environment variables to your .env file
+## Contributing
 
-`API_KEY`
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
 
-`ANOTHER_API_KEY`
+Please make sure to update tests as appropriate.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)

@@ -20,5 +20,5 @@ class LoggerConfig:
         logging.config.fileConfig(
             config_path,
             disable_existing_loggers=False,
-            defaults={"logfilename": f"{LOG_DIR}/{timestamp}.log"},
+            defaults={"filename_log": f"{LOG_DIR}/{timestamp}.log"},
         )

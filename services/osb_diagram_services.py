@@ -92,12 +92,12 @@ class OsbDiagramService:
                             child_pipeline_relations_list = pipeline_relations
                         tree = self.write_recursive_child(tree, child_pipeline_relations_list,pipeline_diagram, proxy_components_aux, pipeline_components, pipeline_components_jms, last_child, check_proxy_diagrams, external_jms_dependency)
                     elif basic_utils.get_last_part_value_from_character('.', pipeline_relations) == 'bix':
-                        logger.debug('Aqui pintaremos los bussines services')
-                        bussines_diagram_child = NodeObject(tree=tree, value=basic_utils.delete_extension(basic_utils.get_file_name(pipeline_relations)), parent=proxy_diagram, fillColor='#d5e8d4', width = 180)
+                        logger.debug('Aqui pintaremos los business services')
+                        business_diagram_child = NodeObject(tree=tree, value=basic_utils.delete_extension(basic_utils.get_file_name(pipeline_relations)), parent=proxy_diagram, fillColor='#d5e8d4', width = 180)
             elif proxy_components_aux[proxy] in pipeline_components.keys():
-                for bussines_parent_values in pipeline_components[proxy_components_aux[proxy]]:
-                    object_color = basic_utils.get_node_color(bussines_parent_values)
-                    bussines_diagram = NodeObject(tree=tree, value=basic_utils.delete_extension(basic_utils.get_file_name(bussines_parent_values)), parent=pipeline_diagram, fillColor=object_color, width = 180)     
+                for business_parent_values in pipeline_components[proxy_components_aux[proxy]]:
+                    object_color = basic_utils.get_node_color(business_parent_values)
+                    business_diagram = NodeObject(tree=tree, value=basic_utils.delete_extension(basic_utils.get_file_name(business_parent_values)), parent=pipeline_diagram, fillColor=object_color, width = 180)     
                     try: 
                         if proxy_components[proxy] in external_jms_dependency.keys() and check_external_jms_dependency == False:
                             business_value = NodeObject(tree=tree, value=f'external dependency\nJMS Type {external_jms_dependency[proxy_components[proxy]]}',parent=pipeline_diagram, fillColor='#e1d5e7', width = 180)
@@ -108,7 +108,7 @@ class OsbDiagramService:
         tree.write()
 
     
-    def write_recursive_child(self, recursive_tree, child_proxies,parent_value, pipeline_values, bussiness_values, proxy_child_relations,last_proxy, check_proxy_painted, external_dependency):
+    def write_recursive_child(self, recursive_tree, child_proxies,parent_value, pipeline_values, business_values, proxy_child_relations,last_proxy, check_proxy_painted, external_dependency):
         check_external_dependency = False
         check_proxy_diagrams = check_proxy_painted
         for child_proxy in child_proxies:
@@ -119,20 +119,20 @@ class OsbDiagramService:
                     if pipeline_values[child_proxy] in proxy_child_relations.keys():
                         check_proxy_diagrams.append(child_proxy)
                         if len(proxy_child_relations[pipeline_values[child_proxy]]) > 0:
-                            recursive_tree = self.write_recursive_child(recursive_tree, proxy_child_relations[pipeline_values[child_proxy]], pipeline_value,pipeline_values,bussiness_values, proxy_child_relations, child_proxy, check_proxy_diagrams, external_dependency)
-                    if pipeline_values[child_proxy] in bussiness_values.keys():
-                        for external_calls in bussiness_values[pipeline_values[child_proxy]]:
+                            recursive_tree = self.write_recursive_child(recursive_tree, proxy_child_relations[pipeline_values[child_proxy]], pipeline_value,pipeline_values,business_values, proxy_child_relations, child_proxy, check_proxy_diagrams, external_dependency)
+                    if pipeline_values[child_proxy] in business_values.keys():
+                        for external_calls in business_values[pipeline_values[child_proxy]]:
                             if external_calls not in check_proxy_painted and external_calls in pipeline_values.keys():
                                 if type(external_calls) is not list:
-                                    child_bussiness_relations_list = []
-                                    child_bussiness_relations_list.append(external_calls)
+                                    child_business_relations_list = []
+                                    child_business_relations_list.append(external_calls)
                                 else:
-                                    child_bussiness_relations_list = external_calls
-                                recursive_tree = self.write_recursive_child(recursive_tree, child_bussiness_relations_list, pipeline_value,pipeline_values,bussiness_values, proxy_child_relations, child_proxy, check_proxy_diagrams, external_dependency)
+                                    child_business_relations_list = external_calls
+                                recursive_tree = self.write_recursive_child(recursive_tree, child_business_relations_list, pipeline_value,pipeline_values,business_values, proxy_child_relations, child_proxy, check_proxy_diagrams, external_dependency)
                             object_color = basic_utils.get_node_color(external_calls)
                             try: 
                                 if external_calls not in proxy_child_relations[pipeline_values[child_proxy]]:
-                                    if pipeline_values[external_calls] not in  proxy_child_relations.keys() and external_calls not in child_bussiness_relations_list:
+                                    if pipeline_values[external_calls] not in  proxy_child_relations.keys() and external_calls not in child_business_relations_list:
                                         business_value = NodeObject(tree=recursive_tree, value=basic_utils.delete_extension(basic_utils.get_file_name(external_calls)),parent=pipeline_value, fillColor=object_color, width = 180)
                                     if pipeline_values[child_proxy] in external_dependency.keys() and check_external_dependency == False:
                                         business_value = NodeObject(tree=recursive_tree, value=f'external dependency\nJMS Type {external_dependency[pipeline_values[child_proxy]]}',parent=pipeline_value, fillColor='#e1d5e7', width = 180)
