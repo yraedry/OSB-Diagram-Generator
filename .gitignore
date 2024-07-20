@@ -103,3 +103,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+cloned_repositories
+cloned_repositories/*
+
+logs/*
+files/*
