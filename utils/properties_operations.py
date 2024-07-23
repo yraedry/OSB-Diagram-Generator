@@ -6,6 +6,6 @@ class PropertyOperations:
         config = configparser.RawConfigParser()
         property_dir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(property_dir)
-        config.read(r'../properties/config.conf')
+        config.read(r'../properties/config.ini')
         get_property = config.get(section_property, name_property)
         return get_property

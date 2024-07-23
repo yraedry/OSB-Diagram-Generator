@@ -13,15 +13,15 @@ class BitBucketController:
         self.url = url
     
     def call_bitbucket_api(self, url):
-        basic = HTTPBasicAuth(property_config.read_properties('CredentialSection', 'credential.user'), property_config.read_properties('CredentialSection', 'credential.tokenApi'))
-        is_proxy_enabled = property_config.read_properties('ProxySection', 'proxy.enabled')
+        basic = HTTPBasicAuth(property_config.read_properties('credential', 'user'), property_config.read_properties('credential', 'tokenApi'))
+        is_proxy_enabled = property_config.read_properties('proxy', 'enabled')
         try:
             # Delete HTTP Warnings
             requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
             if is_proxy_enabled != 'false':
                 proxies = {
-                    'http': property_config.read_properties('ProxySection', 'proxy.http'),
-                    'https': property_config.read_properties('ProxySection', 'proxy.https')
+                    'http': property_config.read_properties('proxy', 'http'),
+                    'https': property_config.read_properties('proxy', 'https')
                 }
                 response = requests.get(self.url + url, auth=basic, proxies=proxies, verify=False, timeout=3).json()
             else:
@@ -35,7 +35,7 @@ class BitBucketController:
             logger.error(response.status_code)
             
     def get_bitbucket_repos(self):
-        response_api = self.call_bitbucket_api(f'?limit={property_config.read_properties('BitbucketSection', 'bitbucket.param')}')
+        response_api = self.call_bitbucket_api(f'?limit={property_config.read_properties('bitbucket', 'param')}')
         return response_api
 
     def get_bitbucket_files(self, repo):

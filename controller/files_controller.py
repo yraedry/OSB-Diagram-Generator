@@ -18,17 +18,17 @@ class FilesController:
         osb_dir = os.path.normpath(f'{self.path_dir}/cloned_repositories')
         osb_services = open(service_dir, "r")
         for service in osb_services:
-            osb_services_list.append(f'{osb_dir}{service.replace("\n", "")}')
+            osb_services_list.append(os.path.normpath(f'{osb_dir}/{service.replace("\n", "")}'))
         return osb_services_list
 
     def get_proxy_path(self, repo):
         repository_path = os.path.normpath(f'{self.path_dir}/cloned_repositories\{repo}')
-        proxy_path = directory_utils.get_folder_path('proxy')
+        proxy_path = directory_utils.get_folder_path(repository_path, 'proxy')
         return proxy_path
 
     def get_pipeline_path(self, repo):
         repository_path = os.path.normpath(f'{self.path_dir}/cloned_repositories/{repo}')
-        pipeline_path = directory_utils.get_folder_path('pipeline')
+        pipeline_path = directory_utils.get_folder_path(repository_path, 'pipeline')
         return pipeline_path
     
     def get_business_path(self, repo):
@@ -37,5 +37,9 @@ class FilesController:
         return business_path
     
     def get_file_from_path(self, path, file_type):
-        components = directory_utils.get_file_name(file_type)
+        components = directory_utils.get_file_name(path, file_type)
+        return components
+    
+    def get_content_file_from_path(self, path, file_name):
+        components = directory_utils.get_content_file(path, file_name)
         return components
