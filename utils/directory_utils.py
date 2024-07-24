@@ -21,6 +21,7 @@ def get_folder_path(service_path, search_type):
             extension = basic_utils.get_last_part_value_from_character('.', file)
             if extension == search_type:
                 folder_path = path
+                break
     return folder_path
 
 def get_file_name(file_path, search_type):

@@ -35,23 +35,25 @@ class OsbLocalReposService:
         repository = self.get_repository_name(components)
         proxy_relations = self.get_proxy_relations(repository)
         proxy_components.update(proxy_relations)
-        proxies_type = self.get_type_proxies(repository)
+        proxies_type = self.get_jms_type_proxy(repository)
+        
         for proxy_value in proxy_components:
             if len(proxy_jms_type_relations) == 0:
-                proxy_jms_type_relations = self.get_type_proxies(repository)
+                proxy_jms_type_relations = self.get_jms_type_proxy(repository)
             else:
-                proxy_jms_type_relations.update(self.get_type_proxies(repository))
-            pipeline_relations = (self.get_pipelines_relations(repository))
-            if len(pipeline_jms_type_relations) == 0:
-                pipeline_jms_type_relations = self.get_jms_type_pipeline(repository, len(proxies_type))
-            else:
-                pipeline_jms_type_relations.update(self.get_jms_type_pipeline(repository, len(proxies_type)))
-            # if len(pipeline_relations) > 0:
-            #     pipeline_components.update(pipeline_relations)
-            #     for business_name in pipeline_components[proxy_components[proxy_value]]:
-            #         business_relations = (self.get_business_relations(repo, business_name))
-            #         if business_relations is not None and len(business_relations) > 0:
-            #             business_components.update(business_relations)      
+                proxy_jms_type_relations.update(self.get_jms_type_proxy(repository))
+        #     pipeline_relations = (self.get_pipelines_relations(repository))
+        #     if len(pipeline_jms_type_relations) == 0:
+        #         pipeline_jms_type_relations = self.get_jms_type_pipeline(repository, len(proxies_type))
+        #     else:
+        #         pipeline_jms_type_relations.update(self.get_jms_type_pipeline(repository, len(proxies_type)))
+        #     if len(pipeline_relations) > 0:
+        #         pipeline_components.update(pipeline_relations)
+        # logger.debug(proxies_type)
+        #         for business_name in pipeline_components[proxy_components[proxy_value]]:
+        #             business_relations = (self.get_business_relations(repo, business_name))
+        #             if business_relations is not None and len(business_relations) > 0:
+        #                 business_components.update(business_relations)      
         # service_components.append(proxy_components)
         # osb_diagram = OsbDiagramService()
         # if len(proxy_jms_type_relations) == 0 and len(pipeline_jms_type_relations) == 0:
@@ -65,20 +67,19 @@ class OsbLocalReposService:
         proxy_content = self.get_xml_values(repo, file_type)
         for xml_values in proxy_content:
             pipeline_path_name = xml_utils.find_proxy_invoke(proxy_content[xml_values])
-            proxy_components_relations[xml_values] = pipeline_path_name
+            proxy_path_name = f'{basic_utils.get_previous_part_value_from_character('/', pipeline_path_name)}{xml_values}'
+            proxy_components_relations[proxy_path_name] = pipeline_path_name
         return proxy_components_relations
     
-    def get_type_proxies(self, repo):
+    def get_jms_type_proxy(self, repo):
         jms_type_proxy_dict = {}
         pattern = r'JMSType = '
         file_type = 'proxy'
         proxy_content = self.get_xml_values(repo, file_type)
         for xml_values in proxy_content:
             proxy_type = xml_utils.find_proxy_type(proxy_content[xml_values])
-            if proxy_type == "jms":
-                jms_type_proxy_dict[xml_values] = basic_utils.delete_with_pattern(pattern, proxy_type)
-            else:
-                jms_type_proxy_dict[xml_values] = proxy_type
+            if proxy_type is not None and 'JMSType' in proxy_type.text:
+                jms_type_proxy_dict[xml_values] = basic_utils.delete_with_pattern(pattern, proxy_type.text)
         return jms_type_proxy_dict
     
     def get_pipelines_relations(self, repo):
