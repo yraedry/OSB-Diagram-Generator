@@ -1,6 +1,6 @@
 import os
 from utils.properties_operations import PropertyOperations as property_config
-from utils import basic_utils
+from utils import basic_utils, xml_utils
 from controller.bitbucket_controller import BitBucketController
 from utils.logger_config import LoggerConfig as log_config
 from services.osb_diagram_services import OsbDiagramService
@@ -19,8 +19,8 @@ class OsbHttpService:
     def get_repos(self) -> None:
         # Metodo para obtener los repositorios que elijamos por parametro y poder listarlos en un dropdownlist
         services_repo=[]
-        services_allowed = basic_utils.create_list_from_properties(property_config.read_properties('ServicesSection', 'services.start.name'))
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        services_allowed = basic_utils.create_list_from_properties(property_config.read_properties('services', 'start_name'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         response_api = request_bitbucket.get_bitbucket_repos()
         for line in response_api['values']:
             if len(services_allowed) > 0 and services_allowed[0] != '': 
@@ -35,7 +35,7 @@ class OsbHttpService:
         
     def get_services_files(self, repo):
         service_files_repo=[]
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         response_api = request_bitbucket.get_bitbucket_files(repo)
         for line in response_api['values']:
             if line.endswith('.proxy'):
@@ -57,7 +57,7 @@ class OsbHttpService:
         proxies_type = {}
         proxy_relations = self.get_proxy_relations(repo, components)
         proxy_components.update(proxy_relations)
-        proxies_type = self.get_jms_type_proxy(repo, proxy_components)
+        proxies_type = self.get_type_proxies(repo, proxy_components)
         for proxy_value in proxy_components:
             if len(proxy_jms_type_relations) == 0:
                 proxy_jms_type_relations = self.get_jms_type_proxy(repo, proxy_value)
@@ -82,32 +82,31 @@ class OsbHttpService:
             osb_diagram.osb_jms_diagram(repo, proxy_components, pipeline_components, business_components, proxy_jms_type_relations, pipeline_jms_type_relations)
         
     def get_proxy_relations(self, repo, components):
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         proxy_components_relations={}
         for component in components:
             response_api = request_bitbucket.get_bitbucket_component(repo, component)
             response_to_xml = basic_utils.response_json_to_xml(response_api)
-            response_xml = ET.fromstring(response_to_xml).find(".//{*}invoke")
-            pipeline_path_name = response_xml.attrib['ref']
-            proxy_components_relations[component] = f'{pipeline_path_name}.pipeline'
+            pipeline_path_name = xml_utils.find_proxy_invoke(response_to_xml)
+            proxy_components_relations[component] = f'{pipeline_path_name}'
         return proxy_components_relations
     
     def get_pipelines_relations(self, repo, pipeline_name):
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         pipeline_relations_list =[]
-        exclude_services= basic_utils.create_list_from_properties(property_config.read_properties('ExcludeSection', 'exclude.proxies'))
+        exclude_services= basic_utils.create_list_from_properties(property_config.read_properties('services', 'exclude'))
         pipeline_components_relations={}
         response_api = request_bitbucket.get_bitbucket_component(repo, pipeline_name)
         response_to_xml = basic_utils.response_json_to_xml(response_api)
         if response_to_xml != 'not found':
             try:
                 if response_api['isLastPage'] is True:
-                    response_xml = basic_utils.remove_duplicate_items_xml(ET.fromstring(response_to_xml).findall(".//{*}service"))
+                    response_xml = xml_utils.find_pipeline_service(response_to_xml)
                 else:
                     second_api_request = request_bitbucket.get_bitbucket_component(repo, pipeline_name)
                     second_response_to_xml = basic_utils.response_json_to_xml(second_api_request)
                     response_to_xml = f'{response_to_xml}{second_response_to_xml}'
-                    response_xml = basic_utils.remove_duplicate_items_xml(ET.fromstring(response_to_xml).findall(".//{*}service"))
+                    response_xml = xml_utils.find_pipeline_service(response_to_xml)
             except:
                 logger.error('found error in service, continue with erros')
             for service_match in response_xml:
@@ -120,20 +119,20 @@ class OsbHttpService:
         return pipeline_components_relations
 
     def get_business_relations(self, repo, business_name):
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         business_components_relations={}
         response_api = request_bitbucket.get_bitbucket_component(repo, business_name)
         if('errors' not in response_api):
             response_to_xml = basic_utils.response_json_to_xml(response_api)
-            endpoint = ET.fromstring(response_to_xml).find(".//{*}value")
+            endpoint = xml_utils.find_business_values(response_to_xml)
             if endpoint is not None:
                 business_components_relations[business_name] = endpoint.text
         return business_components_relations
 
     def create_file_bitbucket_repos(self) -> None:
         # Metodo para obtener los repositorios que elijamos por parametro y guardarlos en un fichero
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
-        services_allowed = basic_utils.create_list_from_properties(property_config.read_properties('ServicesSection', 'services.start.name'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
+        services_allowed = basic_utils.create_list_from_properties(property_config.read_properties('services', 'start_name'))
         response_api = request_bitbucket.get_bitbucket_repos()
         service_dir = os.path.normpath(os.getcwd() + os.sep + os.pardir + "/files")
         with open(service_dir + "/services.txt", 'w') as f:
@@ -149,7 +148,7 @@ class OsbHttpService:
     def browse_bitbucket_repo(self, repos) -> None:
         # Metodo para obtener los ficheros de los repositorios (metodo simple)
         components_repo = []
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint')) 
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint')) 
         get_repo = request_bitbucket.get_bitbucket_repos()
         for component in get_repo['values']:
             extension = os.path.splitext(component)
@@ -157,41 +156,52 @@ class OsbHttpService:
                 components_repo.append(component) 
     
     def get_jms_type_pipeline(self, repo, component, proxy_type):
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         jms_types_dict = {}
         jms_types_list = []
         response_api = request_bitbucket.get_bitbucket_component(repo, component)
         response_to_xml = basic_utils.response_json_to_xml(response_api)
-        response_xml = ET.fromstring(response_to_xml).findall(".//{*}header[@name='JMSType']/{*}xqueryText")
-        if len(response_xml) > 0:
-            for jms_type in response_xml:
-                jms_types_list.append(jms_type.text)
-            jms_types_dict[component] = jms_types_list
-        elif proxy_type > 0:
-            jms_types_dict = self.get_pipelines_relations(request_bitbucket, repo, component)
+        if response_to_xml != 'not found':
+            response_xml = xml_utils.find_pipeline_jms_type(response_to_xml)
+            if len(response_xml) > 0:
+                for jms_type in response_xml:
+                    jms_types_list.append(jms_type.text)
+                jms_types_dict[component] = jms_types_list
+            elif proxy_type > 0:
+                jms_types_dict = self.get_pipelines_relations(repo, component)
         return jms_types_dict
 
+    def get_type_proxies(self, repo, components):
+            request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
+            jms_type_proxy_dict = {}
+            pattern = r'JMSType = '
+            for component in components:
+                response_api = request_bitbucket.get_bitbucket_component(repo, component)
+                response_to_xml = basic_utils.response_json_to_xml(response_api)
+                proxy_type = xml_utils.find_proxy_type(response_to_xml)
+                if proxy_type is not None and 'JMSType' in proxy_type.text:
+                    jms_type_proxy_dict[component] = basic_utils.delete_with_pattern(pattern, proxy_type.text)      
+            return jms_type_proxy_dict    
+        
     def get_jms_type_proxy(self, repo, component):
-        request_bitbucket = BitBucketController(property_config.read_properties('BitbucketSection', 'bitbucket.endpoint'))
+        request_bitbucket = BitBucketController(property_config.read_properties('bitbucket', 'endpoint'))
         jms_type_proxy_dict = {}
         pattern = r'JMSType = '
         response_api = request_bitbucket.get_bitbucket_component(repo, component)
         response_to_xml = basic_utils.response_json_to_xml(response_api)
-        proxy_type = ET.fromstring(response_to_xml).find(".//{*}provider-id")
-        if proxy_type.text == "jms":
-            proxy_jms_type = ET.fromstring(response_to_xml).find(".//{*}message-selector")
-            if proxy_jms_type is not None:
-                jms_type_proxy_dict[component] = basic_utils.delete_with_pattern(pattern, proxy_jms_type.text)
+        proxy_type = xml_utils.find_proxy_type(response_to_xml)
+        if proxy_type is not None and 'JMSType' in proxy_type.text:
+            jms_type_proxy_dict[component] = basic_utils.delete_with_pattern(pattern, proxy_type.text)     
         return jms_type_proxy_dict        
     
     def clone_services_local(self, repos) -> None:
             for repo in repos:
                 cwd = os.getcwd()
                 service_dir = f'{os.path.abspath(os.path.join(cwd, os.pardir))}\\cloned_repositories\\{repo}\\'
-                clone_url = f'{property_config.read_properties("BitbucketSection", "bitbucket.clone")}/{repo}.git'
+                clone_url = f'{property_config.read_properties("bitbucket", "bitbucket.clone")}/{repo}.git'
                 try:
                     if not os.path.exists(service_dir):
-                        Repo.clone_from(clone_url, service_dir, config=f'https.proxy=https://{property_config.read_properties("ProxySection", "proxy.https")}, x-token-auth:{property_config.read_properties('CredentialSection', 'credential.tokenApi')}', branch=property_config.read_properties("BitbucketSection", "bitbucket.branch"), allow_unsafe_options=True)
+                        Repo.clone_from(clone_url, service_dir, config=f'https.proxy=https://{property_config.read_properties("proxy", "https")}, x-token-auth:{property_config.read_properties('credential', 'tokenApi')}', branch=property_config.read_properties("bitbucket", "branch"), allow_unsafe_options=True)
                     else:
                         found_repo = Repo(service_dir)
                         found_repo.remotes[0].pull()

@@ -38,3 +38,10 @@ def find_pipeline_jms_type(xml_content):
     except:
         logger.error("no jms types found")
     return get_jms_types
+
+def find_business_values(xml_content):
+    try:
+        get_values = ET.fromstring(xml_content).find(".//{*}value")
+    except:
+        logger.error("no business values found")
+    return get_values
