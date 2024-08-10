@@ -57,6 +57,7 @@ class OsbDiagramService:
             file_name = f'{repo}.drawio',
             direction = "down",
             link_style = "orthogonal",
+            
         )
       
         for proxy_jms in pipeline_jms_types:
