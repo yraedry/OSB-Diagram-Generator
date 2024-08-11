@@ -1,14 +1,11 @@
 from utils.properties_operations import PropertyOperations as property_config
 from utils import basic_utils
-from repository.proxy_repository import ProxyRepository, ProxyService
-from repository.pipeline_repository import PipelineRepository, Pipeline
-from repository.business_repository import BusinessRepository, BusinessService
-from utils.xml_utils import XmlCommons
+from repository.proxy_repository import ProxyService
+from repository.pipeline_repository import  Pipeline
 from utils.logger_config import LoggerConfig as log_config
 from services.osb_diagram_services import OsbDiagramService
 import logging
 from repository.xml_repository import XmlRepository
-from repository.file_repository import FileRepository
 
 # Inicializamos el logger
 log_config.setup_logging()
@@ -20,13 +17,19 @@ class OsbLocalReposService:
         
     def create_components_relation(self, components) -> None:
         proxies_list = []
+        include_jms_proxies = False
         services = Services(self.path)
         proxy_services = ProxyService('','','','')
         pipeline = Pipeline('','')
         repository = services.get_service_name(components)
         proxies_list = proxy_services.create_all_proxy_object(repository, self.path)
-        for proxy_value in proxies_list:
-            pipeline = (pipeline.create_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation))
+        if proxies_list[1] == True:
+            include_jms_proxies = True
+        for proxy_value in proxies_list[0]:
+            if include_jms_proxies == False:
+                pipeline = pipeline.create_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
+            else:
+                pipeline = pipeline.create_jms_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
             if pipeline.pipeline_name == proxy_value.pipeline_relation:
                     proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
         logger.info('objeto terminado')

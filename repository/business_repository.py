@@ -25,16 +25,21 @@ class BusinessService:
         self.business_uri = business_uri
         self.business_type = business_type
     
-    def create_business_object(self, repo, path, pipeline_name, business_path):
+    def create_business_object(self, repo, path, pipeline_name, business_child_name):
         business_repository = BusinessRepository()
         xml_commons = XmlCommons()
         xml_repository = XmlRepository(path)
         file_repository = FileRepository(path)
         file_type = 'bix'
         business_content = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
-        business_name = business_repository.get_name(business_path)
-        business_type = business_repository.get_type(business_content[business_path])
-        business_uri = business_repository.get_uri(business_content[business_path])
+        business_name = business_repository.get_name(business_child_name)
+        if business_child_name not in business_content:
+            external_dependency = 'external dependency'
+            business_type =  external_dependency
+            business_uri = external_dependency
+        else:
+            business_type = business_repository.get_type(business_content[business_child_name])
+            business_uri = business_repository.get_uri(business_content[business_child_name])
         business = BusinessService(pipeline_name, business_name, business_uri, business_type)
         return business
         

@@ -4,6 +4,7 @@ from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
 from repository.file_repository import FileRepository
 from utils import basic_utils
+from utils.properties_operations import PropertyOperations as property_config
 class ProxyRepository(ProxyInterface):
     def get_name(self, proxy_name):
         return proxy_name
@@ -39,15 +40,18 @@ class ProxyService:
         file_repository = FileRepository(path)
         proxy_service_list = []
         file_type = 'proxy'
+        include_jms_proxy = False
         proxy_content = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         for xml_values in proxy_content:
             proxy_name = proxy_repository.get_name(xml_values)
             proxy_type = proxy_repository.get_type(proxy_content[xml_values])
+            if "JMSType" in proxy_type:
+                include_jms_proxy = True
             associated_pipeline =  basic_utils.get_last_part_value_from_character('/',proxy_repository.get_invoke(proxy_content[xml_values]))
             proxy_uri = proxy_repository.get_uri(proxy_content[xml_values])
             proxy = ProxyService(proxy_name, proxy_uri, proxy_type, associated_pipeline)
             proxy_service_list.append(proxy)
-        return proxy_service_list
+        return proxy_service_list, include_jms_proxy
     
     def create_proxy_object(self, repo, path, proxy_child_name):
         proxy_repository = ProxyRepository()
@@ -66,9 +70,9 @@ class ProxyService:
             proxy_type = proxy_repository.get_type(proxy_content[proxy_child_name])
             associated_pipeline =  basic_utils.get_last_part_value_from_character('/',proxy_repository.get_invoke(proxy_content[proxy_child_name]))
             proxy_uri = proxy_repository.get_uri(proxy_content[proxy_child_name])
-        proxy = ProxyService(proxy_name, proxy_uri, proxy_type, associated_pipeline)
-        
+        proxy = ProxyService(proxy_name, proxy_uri, proxy_type, associated_pipeline) 
         return proxy
+    
 
     def add_pipeline(self, child_pipeline):
         self.pipeline = child_pipeline        
@@ -80,3 +84,8 @@ class ProxyService:
     def add_proxy_to_pipeline(self, pipeline, proxy_service):
         pipeline.add_proxy(proxy_service)
         return pipeline
+
+class ProxyJmsService:
+    def __init__(self, proxy_name, jms_type):
+        self.proxy_name = proxy_name
+        self.jms_type = jms_type
