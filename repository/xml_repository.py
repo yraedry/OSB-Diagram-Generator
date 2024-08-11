@@ -2,7 +2,6 @@ import os
 from interfaces.xml_interface import XmlInterface
 from utils import directory_utils
 
-
 class XmlRepository(XmlInterface):
     def __init__(self, path_dir):
         self.path_dir = path_dir

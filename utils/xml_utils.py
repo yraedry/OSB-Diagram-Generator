@@ -13,8 +13,10 @@ class ProxyXmlContent:
         try:
             get_invoke = ET.fromstring(xml_content).find(".//{*}invoke")
             pipeline_path_name = get_invoke.attrib['ref']
-        except AttributeError:
+        except (AttributeError, KeyError):
             logger.error("proxy invoke not found")
+            pipeline_path_name = 'not found'
+            return pipeline_path_name
         return f'{pipeline_path_name}.pipeline'
     
 class PipelineXmlContent:
@@ -42,21 +44,22 @@ class BusinessXmlContent:
     
 class XmlCommonContent:
     def find_type(self, xml_content):
-        common_type = ET.fromstring(xml_content).find(".//{*}provider-id")
-        common_type_value = common_type.text
         try:
+            common_type = ET.fromstring(xml_content).find(".//{*}provider-id")
+            common_type_value = common_type.text
             if common_type_value == "jms":
                 common_type = ET.fromstring(xml_content).find(".//{*}message-selector")
                 common_type_value = common_type.text
-        except AttributeError:
+        except (AttributeError, UnboundLocalError, KeyError):
             logger.info("type not found")
+            common_type_value = 'not found'
         return common_type_value
     
     def find_uri(self, xml_content):
         try:
             common_uri = ET.fromstring(xml_content).find(".//{*}value")
             common_uri_value = common_uri.text
-        except (AttributeError, UnboundLocalError):
+        except (AttributeError, UnboundLocalError, KeyError):
             common_uri_value = "not found"
             logger.error("uri not found")
         return common_uri_value
