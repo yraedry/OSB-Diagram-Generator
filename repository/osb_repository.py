@@ -25,27 +25,12 @@ class OsbRepository(OsbInterface):
     
 
 class OsbProject(ProxyService, Pipeline, BusinessService):
-    def __init__(self, project_name, proxy_service, pipeline, business_service):
-        self.project_name = project_name
-        self.proxy_service = proxy_service
-        self.pipeline = pipeline
-        self.business_service = business_service
+    def __init__(self, project):
+        self.project = project
     
     def add_project_name(self, project_name):
         self.project_name = project_name
         return project_name
-     
-    def add_proxy(self, proxy_service):
-        self.proxy_service = proxy_service
-        return proxy_service
-    
-    def add_pipeline(self, pipeline):
-        self.pipeline = pipeline
-        return pipeline
-    
-    def add_business(self, business_service):
-        self.business_service = business_service
-        return business_service
     
     def find_relations(self, proxy_services):
         pattern = r'JMSType = '
@@ -56,10 +41,17 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
             if proxy_services.index(proxy_service) not in delete_indexs:
                 no_relation_proxy_indexs.append(proxy_services.index(proxy_service))
             for find_relation in proxy_services:
-                if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]:
-                    proxy_service.pipeline.proxy_service.append(find_relation)
-                    if proxy_services.index(find_relation) not in delete_indexs:
-                        delete_indexs.append(proxy_services.index(find_relation))
+                if len(proxy_service.pipeline.associated_jms_components) > 0:
+                    if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]:
+                        proxy_service.pipeline.proxy_service.append(find_relation)
+                        if proxy_services.index(find_relation) not in delete_indexs:
+                            delete_indexs.append(proxy_services.index(find_relation))
+                elif len(proxy_service.pipeline.associated_components) > 0:
+                        proxy_service.pipeline.proxy_service.append(find_relation)
+                        if proxy_services.index(find_relation) not in delete_indexs:
+                            delete_indexs.append(proxy_services.index(find_relation))
+                else:
+                    logger.info('aqui tenemos que añádir mas logica')
         no_relation_proxy_indexs = list(set(no_relation_proxy_indexs).difference(delete_indexs))
         for no_relation_proxy_index in no_relation_proxy_indexs:
             project.append(proxy_services[no_relation_proxy_index])

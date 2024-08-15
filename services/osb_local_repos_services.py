@@ -19,7 +19,7 @@ class OsbLocalReposService:
         
     def create_components_relation(self, components) -> None:
         services = Services(self.path)
-        osb_project = OsbProject('','','','')
+        osb_project = OsbProject('')
         proxy_services = ProxyService('','','','')
         pipeline = Pipeline('','')
         repository = services.get_service_name(components)
@@ -36,8 +36,14 @@ class OsbLocalReposService:
                 pipeline = pipeline.choose_object_to_pipeline(pipeline, associated_components)
             proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
   
-        complete_project = osb_project.find_relations(proxies_service_list)
-        return complete_project
+        osb_project.project = osb_project.find_relations(proxies_service_list)
+        osb_diagram = OsbDiagramService()
+        osb_diagram.osb_basic_diagram(osb_project)
+        return osb_project
+    
+    def create_project_diagram(self, project):
+        osb_project = OsbProject(project)
+        OsbDiagramService.osb_basic_diagram(osb_project)
 
 class Services(OsbLocalReposService):
     def get_services_files(self) -> None:
