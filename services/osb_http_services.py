@@ -5,7 +5,6 @@ from controller.bitbucket_controller import BitBucketController
 from utils.logger_config import LoggerConfig as log_config
 from services.osb_diagram_services import OsbDiagramService
 import logging
-import xml.etree.ElementTree as ET
 from git import Repo
 
 # Inicializamos el logger

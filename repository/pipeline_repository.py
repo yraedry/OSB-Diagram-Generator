@@ -5,8 +5,6 @@ from repository.xml_repository import XmlRepository
 from repository.file_repository import FileRepository
 from repository.proxy_repository import ProxyService
 from repository.business_repository import BusinessService 
-from utils import basic_utils
-from utils.properties_operations import PropertyOperations as property_config
 from utils.logger_config import LoggerConfig as log_config
 import logging
 

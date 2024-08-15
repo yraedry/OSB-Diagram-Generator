@@ -4,7 +4,7 @@ from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
 from repository.file_repository import FileRepository
 from utils import basic_utils
-from utils.properties_operations import PropertyOperations as property_config
+
 class ProxyRepository(ProxyInterface):
     def get_name(self, proxy_name):
         return proxy_name
@@ -85,9 +85,3 @@ class ProxyService:
     def add_proxy_to_pipeline(self, pipeline, proxy_service):
         pipeline.add_proxy(proxy_service)
         return pipeline
-    
-
-class ProxyJmsService:
-    def __init__(self, proxy_name, jms_type):
-        self.proxy_name = proxy_name
-        self.jms_type = jms_type
