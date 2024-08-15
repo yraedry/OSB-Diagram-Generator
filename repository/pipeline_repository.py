@@ -1,9 +1,10 @@
 from interfaces.pipeline_interface import PipelineInterface
 from utils.xml_utils import PipelineXmlContent
-from repository.osb_repository import OsbRepository
 from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
 from repository.file_repository import FileRepository
+from repository.proxy_repository import ProxyService
+from repository.business_repository import BusinessService 
 from utils import basic_utils
 from utils.properties_operations import PropertyOperations as property_config
 from utils.logger_config import LoggerConfig as log_config
@@ -20,7 +21,7 @@ class PipelineRepository(PipelineInterface):
         service = osb_pipeline.find_pipeline_service(pipeline_file)
         return service
         
-class Pipeline(OsbRepository):
+class Pipeline:
     def __init__(self, proxy_name_relation, pipeline_name):
         self.proxy_name_relation = proxy_name_relation
         self.pipeline_name = pipeline_name
@@ -31,14 +32,19 @@ class Pipeline(OsbRepository):
     def create_pipeline_object(self, repo, path, proxy_name, associated_pipeline):
         pipeline_repository = PipelineRepository()
         xml_commons = XmlCommons()
+        osb_pipeline = PipelineXmlContent()
         xml_repository = XmlRepository(path)
         file_repository = FileRepository(path)
         file_type = 'pipeline'
         pipelines_dict = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
-        pipeline_services = pipeline_repository.get_service(pipelines_dict[associated_pipeline])
-        pipeline_name = pipeline_repository.get_name(associated_pipeline)
-        pipeline = Pipeline(proxy_name, pipeline_name)
-        pipeline.associated_components = pipeline_services
+        check_jms_type = osb_pipeline.find_pipeline_jms_type(pipelines_dict[associated_pipeline])
+        if check_jms_type is None:
+            pipeline_services = pipeline_repository.get_service(pipelines_dict[associated_pipeline])
+            pipeline_name = pipeline_repository.get_name(associated_pipeline)
+            pipeline = Pipeline(proxy_name, pipeline_name)
+            pipeline.associated_components = pipeline_services
+        else:
+            pipeline = self.create_jms_pipeline_object(repo, path, proxy_name, associated_pipeline)
         return pipeline
     
     def create_jms_pipeline_object(self, repo, path, proxy_name, associated_pipeline):
@@ -64,3 +70,21 @@ class Pipeline(OsbRepository):
         
     def add_business(self, child_business):
         self.business_service.append(child_business)
+    
+    def add_business_to_pipeline(self, pipeline, associated_component):
+        if pipeline.pipeline_name == associated_component.pipeline_name_relation:
+            pipeline.add_business(associated_component)
+        return pipeline
+    
+    def add_proxy_to_pipeline(self, pipeline, associated_component):
+        if pipeline.proxy_name_relation == associated_component.proxy_name:
+                pipeline.add_proxy(associated_component)
+        return pipeline
+    
+    def choose_object_to_pipeline(self, pipeline, associated_components):
+        for associated_component in associated_components:
+            if isinstance(associated_component, BusinessService):
+                pipeline = self.add_business_to_pipeline(pipeline, associated_component)
+            elif isinstance(associated_component, ProxyService):
+                pipeline = self.add_proxy_to_pipeline(pipeline, associated_component)
+        return pipeline

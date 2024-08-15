@@ -18,7 +18,6 @@ class OsbLocalReposService:
         self.path = path
         
     def create_components_relation(self, components) -> None:
-        include_jms_proxies = False
         services = Services(self.path)
         osb_project = OsbProject('','','','')
         proxy_services = ProxyService('','','','')
@@ -26,16 +25,18 @@ class OsbLocalReposService:
         repository = services.get_service_name(components)
         osb_project.add_project_name(repository)
         proxies_list = proxy_services.create_all_proxy_object(repository, self.path)
-        if proxies_list[1] == True:
-            include_jms_proxies = True
-        for proxy_value in proxies_list[0]:
-            if include_jms_proxies == False:
+        for proxy_value in proxies_list:
+            if proxy_value.is_jms == False:
                 pipeline = pipeline.create_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
-                pipeline = services.create_child_service_relations(repository, self.path, pipeline)
             else:
                 pipeline = pipeline.create_jms_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
+            if pipeline.associated_components is not None:
+                associated_components = services.create_child_service_relations(repository, self.path, pipeline)   
             if pipeline.pipeline_name == proxy_value.pipeline_relation:
-                    proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
+                pipeline = pipeline.choose_object_to_pipeline(pipeline, associated_components)
+            proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
+  
+        project = osb_project.find_relations(proxies_list)
         logger.info('objeto terminado')
 
 class Services(OsbLocalReposService):
@@ -53,15 +54,14 @@ class Services(OsbLocalReposService):
     def create_child_service_relations(self, repo, path, pipeline: Pipeline):
         proxy_services = ProxyService('','','','')
         business_service = BusinessService('','','','')
+        associate_component = []
         exclude_services= basic_utils.create_list_from_properties(property_config.read_properties('services', 'exclude'))
         for pipeline_key in pipeline.associated_components:
             if basic_utils.get_file_name(pipeline_key) not in exclude_services:
                 if 'ProxyRef' in pipeline.associated_components[pipeline_key]:
-                    proxy_service_child = proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy')
-                    pipeline.add_proxy(proxy_service_child)
+                    associate_component.append(proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy'))
                 if 'BusinessServiceRef' in pipeline.associated_components[pipeline_key]:
-                    business_service_child = business_service.create_business_object(repo, path, pipeline.pipeline_name, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.bix')
-                    pipeline.add_business(business_service_child)
-        return pipeline
+                    associate_component.append(business_service.create_business_object(repo, path, pipeline.pipeline_name, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.bix'))
+        return associate_component
         
  

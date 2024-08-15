@@ -1,5 +1,4 @@
 from interfaces.proxy_interface import ProxyInterface
-from repository.osb_repository import OsbRepository
 from utils.xml_utils import ProxyXmlContent, XmlCommonContent
 from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
@@ -26,13 +25,14 @@ class ProxyRepository(ProxyInterface):
         return proxy_uri
         
 
-class ProxyService(OsbRepository):
+class ProxyService:
     def __init__(self, proxy_name, uri, proxy_type, pipeline_relation):
         self.proxy_name = proxy_name
         self.uri = uri
         self.proxy_type = proxy_type
         self.pipeline_relation = pipeline_relation
         self.pipeline = []
+        self.is_jms = False
     
     def create_all_proxy_object(self, repo, path):
         proxy_repository = ProxyRepository()
@@ -51,8 +51,9 @@ class ProxyService(OsbRepository):
             associated_pipeline =  basic_utils.get_last_part_value_from_character('/',proxy_repository.get_invoke(proxy_content[xml_values]))
             proxy_uri = proxy_repository.get_uri(proxy_content[xml_values])
             proxy = ProxyService(proxy_name, proxy_uri, proxy_type, associated_pipeline)
+            proxy.is_jms = include_jms_proxy
             proxy_service_list.append(proxy)
-        return proxy_service_list, include_jms_proxy
+        return proxy_service_list
     
     def create_proxy_object(self, repo, path, proxy_child_name):
         proxy_repository = ProxyRepository()
@@ -84,6 +85,7 @@ class ProxyService(OsbRepository):
     def add_proxy_to_pipeline(self, pipeline, proxy_service):
         pipeline.add_proxy(proxy_service)
         return pipeline
+    
 
 class ProxyJmsService:
     def __init__(self, proxy_name, jms_type):
