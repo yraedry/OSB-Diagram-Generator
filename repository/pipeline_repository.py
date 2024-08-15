@@ -12,6 +12,7 @@ import logging
 
 log_config.setup_logging()
 logger = logging.getLogger(__name__)
+
 class PipelineRepository(PipelineInterface):
     def get_name(self, pipeline_name):
         return pipeline_name
@@ -27,6 +28,7 @@ class Pipeline:
         self.pipeline_name = pipeline_name
         self.proxy_service = []
         self.associated_components = {}
+        self.associated_jms_components = {}
         self.business_service = []
     
     def create_pipeline_object(self, repo, path, proxy_name, associated_pipeline):
@@ -38,7 +40,7 @@ class Pipeline:
         file_type = 'pipeline'
         pipelines_dict = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         check_jms_type = osb_pipeline.find_pipeline_jms_type(pipelines_dict[associated_pipeline])
-        if check_jms_type is None:
+        if check_jms_type is None or len(check_jms_type) == 0:
             pipeline_services = pipeline_repository.get_service(pipelines_dict[associated_pipeline])
             pipeline_name = pipeline_repository.get_name(associated_pipeline)
             pipeline = Pipeline(proxy_name, pipeline_name)
@@ -57,12 +59,14 @@ class Pipeline:
         jms_types_relations = []
         pipelines_dict = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         pipeline_name = pipeline_repository.get_name(associated_pipeline)
+        pipeline_services = pipeline_repository.get_service(pipelines_dict[associated_pipeline])
         pipeline = Pipeline(proxy_name, pipeline_name)
         check_jms_type = osb_pipeline.find_pipeline_jms_type(pipelines_dict[associated_pipeline])     
         if check_jms_type is not None: 
             for jms_type in check_jms_type:
-                jms_types_relations.append(jms_type.text)    
-            pipeline.associated_components[proxy_name] = jms_types_relations
+                jms_types_relations.append(jms_type.text)
+            pipeline.associated_components = pipeline_services
+            pipeline.associated_jms_components[proxy_name] = jms_types_relations
         return pipeline
 
     def add_proxy(self, child_proxy):

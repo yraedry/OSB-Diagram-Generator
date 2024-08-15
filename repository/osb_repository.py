@@ -49,10 +49,18 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
     
     def find_relations(self, proxy_services):
         pattern = r'JMSType = '
+        project = []
+        delete_indexs = []
+        no_relation_proxy_indexs = []
         for proxy_service in proxy_services:
+            if proxy_services.index(proxy_service) not in delete_indexs:
+                no_relation_proxy_indexs.append(proxy_services.index(proxy_service))
             for find_relation in proxy_services:
-                if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_components[proxy_service.proxy_name]:
-                    logger.info('encontrada relacion')
+                if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]:
                     proxy_service.pipeline.proxy_service.append(find_relation)
-                    # cada vez que encuentre algun hijo hay que eliminarlo de la lista y hay que añadir los business_Services
-        logger.info('finalizado')
+                    if proxy_services.index(find_relation) not in delete_indexs:
+                        delete_indexs.append(proxy_services.index(find_relation))
+        no_relation_proxy_indexs = list(set(no_relation_proxy_indexs).difference(delete_indexs))
+        for no_relation_proxy_index in no_relation_proxy_indexs:
+            project.append(proxy_services[no_relation_proxy_index])
+        return project

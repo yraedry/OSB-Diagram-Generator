@@ -24,8 +24,8 @@ class OsbLocalReposService:
         pipeline = Pipeline('','')
         repository = services.get_service_name(components)
         osb_project.add_project_name(repository)
-        proxies_list = proxy_services.create_all_proxy_object(repository, self.path)
-        for proxy_value in proxies_list:
+        proxies_service_list = proxy_services.create_all_proxy_object(repository, self.path)
+        for proxy_value in proxies_service_list:
             if proxy_value.is_jms == False:
                 pipeline = pipeline.create_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
             else:
@@ -36,8 +36,8 @@ class OsbLocalReposService:
                 pipeline = pipeline.choose_object_to_pipeline(pipeline, associated_components)
             proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
   
-        project = osb_project.find_relations(proxies_list)
-        logger.info('objeto terminado')
+        complete_project = osb_project.find_relations(proxies_service_list)
+        return complete_project
 
 class Services(OsbLocalReposService):
     def get_services_files(self) -> None:
