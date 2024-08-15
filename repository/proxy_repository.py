@@ -1,4 +1,5 @@
 from interfaces.proxy_interface import ProxyInterface
+from repository.osb_repository import OsbRepository
 from utils.xml_utils import ProxyXmlContent, XmlCommonContent
 from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
@@ -25,7 +26,7 @@ class ProxyRepository(ProxyInterface):
         return proxy_uri
         
 
-class ProxyService:
+class ProxyService(OsbRepository):
     def __init__(self, proxy_name, uri, proxy_type, pipeline_relation):
         self.proxy_name = proxy_name
         self.uri = uri
@@ -73,7 +74,6 @@ class ProxyService:
         proxy = ProxyService(proxy_name, proxy_uri, proxy_type, associated_pipeline) 
         return proxy
     
-
     def add_pipeline(self, child_pipeline):
         self.pipeline = child_pipeline        
         

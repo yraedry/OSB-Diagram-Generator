@@ -1,4 +1,5 @@
 from interfaces.business_interface import BusinessInterface
+from repository.osb_repository import OsbRepository
 from utils.xml_utils import XmlCommonContent
 from utils.xml_utils import XmlCommons
 from repository.xml_repository import XmlRepository
@@ -18,7 +19,7 @@ class BusinessRepository(BusinessInterface):
         business_type = common_content.find_type(business_file)
         return business_type
         
-class BusinessService:
+class BusinessService(OsbRepository):
     def __init__(self, pipeline_name_relation, business_name, business_uri, business_type):
         self.pipeline_name_relation = pipeline_name_relation
         self.business_name = business_name
