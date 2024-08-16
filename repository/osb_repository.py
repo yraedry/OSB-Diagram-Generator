@@ -46,12 +46,6 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
                         proxy_service.pipeline.proxy_service.append(find_relation)
                         if proxy_services.index(find_relation) not in delete_indexs:
                             delete_indexs.append(proxy_services.index(find_relation))
-                elif len(proxy_service.pipeline.associated_components) > 0:
-                        proxy_service.pipeline.proxy_service.append(find_relation)
-                        if proxy_services.index(find_relation) not in delete_indexs:
-                            delete_indexs.append(proxy_services.index(find_relation))
-                else:
-                    logger.info('aqui tenemos que añádir mas logica')
         no_relation_proxy_indexs = list(set(no_relation_proxy_indexs).difference(delete_indexs))
         for no_relation_proxy_index in no_relation_proxy_indexs:
             project.append(proxy_services[no_relation_proxy_index])

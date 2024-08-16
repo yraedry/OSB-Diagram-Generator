@@ -33,10 +33,11 @@ class OsbDiagramService:
         for proxy_child in proxy_service.pipeline.proxy_service:
             proxy_value =NodeObject(tree=recursive_tree, value=proxy_child.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)       
             pipeline_value = NodeObject(tree=recursive_tree, value=proxy_child.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
-            if len(proxy_child.pipeline.proxy_service) > 0:
-                recursive_tree = self.recursive_proxy_childs(recursive_tree, proxy_child, pipeline_value)
-            if len(proxy_child.pipeline.business_service) > 0:
-                recursive_tree = self.recursive_business_childs(recursive_tree, proxy_child, pipeline_value)
+            if not isinstance(proxy_child.pipeline, list):
+                if len(proxy_child.pipeline.proxy_service) > 0:
+                    recursive_tree = self.recursive_proxy_childs(recursive_tree, proxy_child, pipeline_value)
+                if len(proxy_child.pipeline.business_service) > 0:
+                    recursive_tree = self.recursive_business_childs(recursive_tree, proxy_child, pipeline_value)
         return recursive_tree
     
     def recursive_business_childs(self, recursive_tree, proxy_service, parent_value):

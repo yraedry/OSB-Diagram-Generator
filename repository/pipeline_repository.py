@@ -79,8 +79,7 @@ class Pipeline:
         return pipeline
     
     def add_proxy_to_pipeline(self, pipeline, associated_component):
-        if pipeline.proxy_name_relation == associated_component.proxy_name:
-                pipeline.add_proxy(associated_component)
+        pipeline.add_proxy(associated_component)
         return pipeline
     
     def choose_object_to_pipeline(self, pipeline, associated_components):

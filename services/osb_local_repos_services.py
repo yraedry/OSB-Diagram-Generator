@@ -65,7 +65,8 @@ class Services(OsbLocalReposService):
         for pipeline_key in pipeline.associated_components:
             if basic_utils.get_file_name(pipeline_key) not in exclude_services:
                 if 'ProxyRef' in pipeline.associated_components[pipeline_key]:
-                    associate_component.append(proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy'))
+                    if repo not in pipeline_key: #para eliminar los duplicados, pero hay que revisar y testear bien
+                        associate_component.append(proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy'))
                 if 'BusinessServiceRef' in pipeline.associated_components[pipeline_key]:
                     associate_component.append(business_service.create_business_object(repo, path, pipeline.pipeline_name, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.bix'))
         return associate_component
