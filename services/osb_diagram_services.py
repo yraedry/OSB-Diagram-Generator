@@ -3,14 +3,16 @@ import logging
 from utils.logger_config import LoggerConfig as log_config
 from utils import basic_utils
 from drawpyo.diagram_types import TreeDiagram, NodeObject
+from repository.proxy_repository import ProxyService
+from repository.business_repository import BusinessService 
 
 # Inicializamos el logger
 log_config.setup_logging()
 logger = logging.getLogger(__name__)
 
+EXTERNAL_DEPENDENCY = 'external dependency'
 class OsbDiagramService:
-        
-    def osb_basic_diagram(self, osb_project):
+    def create_osb_basic_diagram(self, osb_project):
         tree = TreeDiagram(
         file_path = path.join(path.expanduser('~'), "osb-diagrams"),
         file_name = f'{osb_project.project_name}.drawio',
@@ -22,29 +24,44 @@ class OsbDiagramService:
             proxy_value =NodeObject(tree=tree, value=proxy.proxy_name, base_style="rounded", fillColor='#dae8fc', width = 180)
             pipeline_value = NodeObject(tree=tree, value=proxy.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
             if len(proxy.pipeline.proxy_service) > 0:
-                tree = self.recursive_proxy_childs(tree, proxy, pipeline_value)
+                tree = self.create_recursive_proxy_objects(tree, proxy, pipeline_value)
             if len(proxy.pipeline.business_service) > 0:
-                tree = self.recursive_business_childs(tree, proxy, pipeline_value)
+                tree = self.create_recursive_business_objects(tree, proxy, pipeline_value)
            
         tree.auto_layout()
         tree.write()    
             
-    def recursive_proxy_childs(self, recursive_tree, proxy_service, parent_value):
+    def create_recursive_proxy_objects(self, recursive_tree, proxy_service, parent_value):
         for proxy_child in proxy_service.pipeline.proxy_service:
-            proxy_value =NodeObject(tree=recursive_tree, value=proxy_child.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)       
-            pipeline_value = NodeObject(tree=recursive_tree, value=proxy_child.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
-            if not isinstance(proxy_child.pipeline, list):
-                if len(proxy_child.pipeline.proxy_service) > 0:
-                    recursive_tree = self.recursive_proxy_childs(recursive_tree, proxy_child, pipeline_value)
-                if len(proxy_child.pipeline.business_service) > 0:
-                    recursive_tree = self.recursive_business_childs(recursive_tree, proxy_child, pipeline_value)
+            proxy_value =NodeObject(tree=recursive_tree, value=proxy_child.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)
+            if proxy_child.pipeline_relation != EXTERNAL_DEPENDENCY:
+                pipeline_value = NodeObject(tree=recursive_tree, value=proxy_child.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
+                if not isinstance(proxy_child.pipeline, list):
+                    if len(proxy_child.pipeline.proxy_service) > 0:
+                        recursive_tree = self.create_recursive_proxy_objects(recursive_tree, proxy_child, pipeline_value)
+                    if len(proxy_child.pipeline.business_service) > 0:
+                        recursive_tree = self.create_recursive_business_objects(recursive_tree, proxy_child, pipeline_value)
+                else:
+                    recursive_tree = self.create_recursive_subchilds_objects(recursive_tree, proxy_child.pipeline, pipeline_value)          
         return recursive_tree
     
-    def recursive_business_childs(self, recursive_tree, proxy_service, parent_value):
+    def create_recursive_business_objects(self, recursive_tree, proxy_service, parent_value):
         for proxy_child in proxy_service.pipeline.business_service:
             NodeObject(tree=recursive_tree, value=proxy_child.business_name, base_style="rounded", parent=parent_value, fillColor='#ffe6cc', width = 180)       
         return recursive_tree
-            
+    
+    def create_recursive_subchilds_objects(self, recursive_tree, pipeline_child, parent_value):
+        for check_type_component in pipeline_child:
+            if isinstance(check_type_component, ProxyService) and check_type_component.pipeline_relation != EXTERNAL_DEPENDENCY:
+                proxy_value =NodeObject(tree=recursive_tree, value=check_type_component.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)
+                pipeline_value = NodeObject(tree=recursive_tree, value=check_type_component.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
+                recursive_tree = self.create_recursive_subchilds_objects(recursive_tree, check_type_component.pipeline, pipeline_value)
+            if isinstance(check_type_component, ProxyService) and check_type_component.pipeline_relation == EXTERNAL_DEPENDENCY:
+                NodeObject(tree=recursive_tree, value=check_type_component.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)
+            elif isinstance(check_type_component, BusinessService):
+                NodeObject(tree=recursive_tree, value=check_type_component.business_name, base_style="rounded", parent=parent_value, fillColor='#ffe6cc', width = 180)  
+        return recursive_tree
+        
             
     def osb_http_diagram(self, repo, proxy_components, pipeline_components, business_components): 
         proxy_components_aux={}

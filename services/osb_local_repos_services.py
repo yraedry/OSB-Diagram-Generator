@@ -38,12 +38,12 @@ class OsbLocalReposService:
   
         osb_project.project = osb_project.find_relations(proxies_service_list)
         osb_diagram = OsbDiagramService()
-        osb_diagram.osb_basic_diagram(osb_project)
+        osb_diagram.create_osb_basic_diagram(osb_project)
         return osb_project
     
     def create_project_diagram(self, project):
         osb_project = OsbProject(project)
-        OsbDiagramService.osb_basic_diagram(osb_project)
+        OsbDiagramService.create_osb_basic_diagram(osb_project)
 
 class Services(OsbLocalReposService):
     def get_services_files(self) -> None:
@@ -65,10 +65,19 @@ class Services(OsbLocalReposService):
         for pipeline_key in pipeline.associated_components:
             if basic_utils.get_file_name(pipeline_key) not in exclude_services:
                 if 'ProxyRef' in pipeline.associated_components[pipeline_key]:
-                    if repo not in pipeline_key: #para eliminar los duplicados, pero hay que revisar y testear bien
-                        associate_component.append(proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy'))
+                    # if repo not in pipeline_key: #para eliminar los duplicados, pero hay que revisar y testear bien
+                    associate_component.append(proxy_services.create_proxy_object(repo, path, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.proxy'))
+                    associate_component = self.create_sub_child_service_relations(repo, path, associate_component)
                 if 'BusinessServiceRef' in pipeline.associated_components[pipeline_key]:
                     associate_component.append(business_service.create_business_object(repo, path, pipeline.pipeline_name, f'{basic_utils.get_last_part_value_from_character('/', pipeline_key)}.bix'))
         return associate_component
         
- 
+    def create_sub_child_service_relations(self, repo, path, associated_child_components):
+        pipeline = Pipeline('','')
+        for pipeline_child_relation in associated_child_components:
+            if isinstance(pipeline_child_relation, ProxyService):
+                if pipeline_child_relation.proxy_type != 'external dependency':
+                    pipeline_child_relation.pipeline = pipeline.create_pipeline_object(repo, path, pipeline_child_relation.proxy_name, pipeline_child_relation.pipeline_relation)
+                    pipeline_child_relation.pipeline = self.create_child_service_relations(repo, path, pipeline_child_relation.pipeline)
+        return associated_child_components
+        

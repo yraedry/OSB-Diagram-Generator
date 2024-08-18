@@ -42,6 +42,7 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
                 no_relation_proxy_indexs.append(proxy_services.index(proxy_service))
             for find_relation in proxy_services:
                 if len(proxy_service.pipeline.associated_jms_components) > 0:
+                    # bookingJmsMidOffice provoca un loop infinito
                     if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]:
                         proxy_service.pipeline.proxy_service.append(find_relation)
                         if proxy_services.index(find_relation) not in delete_indexs:

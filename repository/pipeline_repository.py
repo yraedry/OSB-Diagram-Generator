@@ -28,6 +28,7 @@ class Pipeline:
         self.associated_components = {}
         self.associated_jms_components = {}
         self.business_service = []
+        self.external_jms_component = []
     
     def create_pipeline_object(self, repo, path, proxy_name, associated_pipeline):
         pipeline_repository = PipelineRepository()
