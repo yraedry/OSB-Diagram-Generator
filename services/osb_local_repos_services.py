@@ -27,9 +27,9 @@ class OsbLocalReposService:
         proxies_service_list = proxy_services.create_all_proxy_object(repository, self.path)
         for proxy_value in proxies_service_list:
             if proxy_value.is_jms == False:
-                pipeline = pipeline.create_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
+                pipeline = pipeline.create_pipeline_object(repository, self.path, proxy_value, proxy_value.pipeline_relation)
             else:
-                pipeline = pipeline.create_jms_pipeline_object(repository, self.path, proxy_value.proxy_name, proxy_value.pipeline_relation)
+                pipeline = pipeline.create_jms_pipeline_object(repository, self.path, proxy_value, proxy_value.pipeline_relation)
             if pipeline.associated_components is not None:
                 associated_components = services.create_child_service_relations(repository, self.path, pipeline)   
             if pipeline.pipeline_name == proxy_value.pipeline_relation:
@@ -77,7 +77,7 @@ class Services(OsbLocalReposService):
         for pipeline_child_relation in associated_child_components:
             if isinstance(pipeline_child_relation, ProxyService):
                 if pipeline_child_relation.proxy_type != 'external dependency':
-                    pipeline_child_relation.pipeline = pipeline.create_pipeline_object(repo, path, pipeline_child_relation.proxy_name, pipeline_child_relation.pipeline_relation)
+                    pipeline_child_relation.pipeline = pipeline.create_pipeline_object(repo, path, pipeline_child_relation, pipeline_child_relation.pipeline_relation)
                     pipeline_child_relation.pipeline = self.create_child_service_relations(repo, path, pipeline_child_relation.pipeline)
         return associated_child_components
         

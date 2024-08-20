@@ -33,6 +33,7 @@ class ProxyService:
         self.pipeline_relation = pipeline_relation
         self.pipeline = []
         self.is_jms = False
+        self.is_recursive = False
     
     def create_all_proxy_object(self, repo, path):
         proxy_repository = ProxyRepository()
