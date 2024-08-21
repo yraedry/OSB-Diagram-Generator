@@ -32,25 +32,31 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
         self.project_name = project_name
         return project_name
     
-    def find_relations(self, proxy_services):
+    def create_osb_object(self, osb_components_lists):
         pattern = r'JMSType = '
         project = []
         delete_indexs = []
         no_relation_proxy_indexs = []
-        for proxy_service in proxy_services:
-            if proxy_services.index(proxy_service) not in delete_indexs:
-                no_relation_proxy_indexs.append(proxy_services.index(proxy_service))
-            for find_relation in proxy_services:
-                if len(proxy_service.pipeline.associated_jms_components) > 0:
+        for osb_components in osb_components_lists[:]:
+            if osb_components_lists.index(osb_components) not in delete_indexs:
+                no_relation_proxy_indexs.append(osb_components_lists.index(osb_components))
+            for osb_component in osb_components_lists[:]:
+                if len(osb_components.pipeline.associated_jms_components) > 0:
                     # bookingJmsMidOffice provoca un loop infinito
-                    if basic_utils.delete_with_pattern(pattern, find_relation.proxy_type) in proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]:
-                        logger.info(f'proxy type --> {basic_utils.delete_with_pattern(pattern, find_relation.proxy_type)}')
-                        logger.info(f'jms value --> {proxy_service.pipeline.associated_jms_components[proxy_service.proxy_name]}')
-                        if find_relation.is_recursive == False:
-                            proxy_service.pipeline.proxy_service.append(find_relation)
-                            if proxy_services.index(find_relation) not in delete_indexs:
-                                delete_indexs.append(proxy_services.index(find_relation))
+                    if basic_utils.delete_with_pattern(pattern, osb_component.proxy_type) in osb_components.pipeline.associated_jms_components[osb_components.proxy_name]:
+                        logger.info(f'proxy type --> {basic_utils.delete_with_pattern(pattern, osb_component.proxy_type)}')
+                        logger.info(f'jms value --> {osb_components.pipeline.associated_jms_components[osb_components.proxy_name]}')
+                        if osb_component.is_recursive == False:
+                            osb_components.pipeline.proxy_service.append(osb_component)
+                        else:
+                            # para evitar la iteracion completa hay que recrear el objeto pero hay que añadir su segunda iteracion y hay que crear el objeto pipeline de forma correcta
+                            recursive_proxy = ProxyService(osb_component.proxy_name, osb_component.uri, osb_component.proxy_type, osb_component.pipeline_relation)
+                            recursive_proxy.pipeline = osb_component.pipeline
+                            recursive_proxy.pipeline = osb_component.is_jms
+                            osb_components.pipeline.proxy_service.append(recursive_proxy)
+                        if osb_components_lists.index(osb_component) not in delete_indexs:
+                            delete_indexs.append(osb_components_lists.index(osb_component))
         no_relation_proxy_indexs = list(set(no_relation_proxy_indexs).difference(delete_indexs))
         for no_relation_proxy_index in no_relation_proxy_indexs:
-            project.append(proxy_services[no_relation_proxy_index])
+            project.append(osb_components_lists[no_relation_proxy_index])
         return project

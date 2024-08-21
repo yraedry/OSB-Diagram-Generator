@@ -36,7 +36,7 @@ class OsbLocalReposService:
                 pipeline = pipeline.choose_object_to_pipeline(pipeline, associated_components)
             proxy_services.add_pipeline_to_proxy(proxy_value, pipeline)
   
-        osb_project.project = osb_project.find_relations(proxies_service_list)
+        osb_project.project = osb_project.create_osb_object(proxies_service_list)
         osb_diagram = OsbDiagramService()
         osb_diagram.create_osb_basic_diagram(osb_project)
         return osb_project
