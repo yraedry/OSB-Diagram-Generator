@@ -37,26 +37,17 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
         project = []
         delete_indexs = []
         no_relation_proxy_indexs = []
-        for osb_components in osb_components_lists[:]:
+        for osb_components in osb_components_lists:
             if osb_components_lists.index(osb_components) not in delete_indexs:
                 no_relation_proxy_indexs.append(osb_components_lists.index(osb_components))
-            for osb_component in osb_components_lists[:]:
+            for osb_component in osb_components_lists:
                 if len(osb_components.pipeline.associated_jms_components) > 0:
-                    # bookingJmsMidOffice provoca un loop infinito
                     if basic_utils.delete_with_pattern(pattern, osb_component.proxy_type) in osb_components.pipeline.associated_jms_components[osb_components.proxy_name]:
-                        logger.info(f'proxy type --> {basic_utils.delete_with_pattern(pattern, osb_component.proxy_type)}')
-                        logger.info(f'jms value --> {osb_components.pipeline.associated_jms_components[osb_components.proxy_name]}')
-                        if osb_component.is_recursive == False:
-                            osb_components.pipeline.proxy_service.append(osb_component)
-                        else:
-                            # para evitar la iteracion recursiva y no tener un loop infinito hay que recrear el objeto pero hay que añadir su segunda iteracion y hay que crear el objeto pipeline de forma correcta
-                            recursive_proxy = ProxyService(osb_component.proxy_name, osb_component.uri, osb_component.proxy_type, osb_component.pipeline_relation)
-                            recursive_proxy.pipeline = osb_component.pipeline
-                            recursive_proxy.pipeline = osb_component.is_jms
-                            osb_components.pipeline.proxy_service.append(recursive_proxy)
+                        osb_components.pipeline.proxy_service.append(osb_component)
                         if osb_components_lists.index(osb_component) not in delete_indexs:
                             delete_indexs.append(osb_components_lists.index(osb_component))
         no_relation_proxy_indexs = list(set(no_relation_proxy_indexs).difference(delete_indexs))
         for no_relation_proxy_index in no_relation_proxy_indexs:
             project.append(osb_components_lists[no_relation_proxy_index])
         return project
+                

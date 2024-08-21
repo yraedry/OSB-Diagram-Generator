@@ -65,9 +65,10 @@ class Pipeline:
         check_jms_type = osb_pipeline.find_pipeline_jms_type(pipelines_dict[associated_pipeline])     
         if check_jms_type is not None: 
             for jms_type in check_jms_type:
-                jms_types_relations.append(jms_type.text)
                 if basic_utils.delete_with_pattern(pattern, proxy.proxy_type) == jms_type.text:
                     proxy.is_recursive = True
+                else:
+                    jms_types_relations.append(jms_type.text)
             pipeline.associated_components = pipeline_services
             pipeline.associated_jms_components[proxy.proxy_name] = jms_types_relations
         return pipeline
