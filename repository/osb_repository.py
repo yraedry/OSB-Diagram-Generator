@@ -49,7 +49,7 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
                         if osb_component.is_recursive == False:
                             osb_components.pipeline.proxy_service.append(osb_component)
                         else:
-                            # para evitar la iteracion completa hay que recrear el objeto pero hay que añadir su segunda iteracion y hay que crear el objeto pipeline de forma correcta
+                            # para evitar la iteracion recursiva y no tener un loop infinito hay que recrear el objeto pero hay que añadir su segunda iteracion y hay que crear el objeto pipeline de forma correcta
                             recursive_proxy = ProxyService(osb_component.proxy_name, osb_component.uri, osb_component.proxy_type, osb_component.pipeline_relation)
                             recursive_proxy.pipeline = osb_component.pipeline
                             recursive_proxy.pipeline = osb_component.is_jms
