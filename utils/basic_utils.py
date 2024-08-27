@@ -18,6 +18,11 @@ def get_last_part_value_from_character(character, file_path):
     file_name = file_path[find_character + 1:length_path]
     return file_name
 
+def get_previous_part_value_from_character(character, file_path):
+    find_character = file_path.rfind(character)
+    file_name = file_path[:find_character +1]
+    return file_name
+
 def get_complete_file_name(file_path):
     last_slash = file_path.rfind('/')
     length_path = len(file_path)
