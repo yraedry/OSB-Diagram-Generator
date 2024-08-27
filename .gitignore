@@ -109,3 +109,6 @@ cloned_repositories/*
 
 logs/*
 files/*
+OSB-Diagram-Generator.code-workspace
+.vscode/launch.json
+.vscode/settings.json
