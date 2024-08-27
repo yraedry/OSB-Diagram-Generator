@@ -1,10 +1,10 @@
-from interfaces.business_interface import BusinessInterface
-from utils.xml_utils import XmlCommonContent
-from utils.xml_utils import XmlCommons
-from repository.xml_repository import XmlRepository
-from repository.file_repository import FileRepository
+from src.services.interfaces.business_interface import BusinessInterface
+from src.utils.xml_utils import XmlCommonContent
+from src.utils.xml_utils import XmlCommons
+from src.services.operations.xml_operations import XmlOperations
+from src.services.operations.file_operations import FileOperations
 
-class BusinessRepository(BusinessInterface):
+class BusinessOperations(BusinessInterface):
     def get_name(self, business_name):
         return business_name
     
@@ -26,10 +26,10 @@ class BusinessService:
         self.business_type = business_type
     
     def create_business_object(self, repo, path, pipeline_name, business_child_name):
-        business_repository = BusinessRepository()
+        business_repository = BusinessOperations()
         xml_commons = XmlCommons()
-        xml_repository = XmlRepository(path)
-        file_repository = FileRepository(path)
+        xml_repository = XmlOperations(path)
+        file_repository = FileOperations(path)
         file_type = 'bix'
         business_content = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         business_name = business_repository.get_name(business_child_name)

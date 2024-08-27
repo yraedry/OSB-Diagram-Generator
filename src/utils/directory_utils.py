@@ -1,10 +1,10 @@
 import os
 import logging
-from utils import basic_utils
-from utils.logger_config import LoggerConfig as log_config
+from src.utils import basic_utils
+from src.utils import logger_utils
 
 
-log_config.setup_logging()
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 def create_dirs(path):

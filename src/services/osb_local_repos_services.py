@@ -1,17 +1,21 @@
-from utils.properties_operations import PropertyOperations as property_config
-from utils import basic_utils
-from repository.osb_repository import OsbProject
-from repository.proxy_repository import ProxyService
-from repository.pipeline_repository import  Pipeline
-from repository.business_repository import BusinessService 
-from utils.logger_config import LoggerConfig as log_config
-from services.osb_diagram_services import OsbDiagramService
+from dotenv import load_dotenv 
+import os
+from src.utils import basic_utils
+from src.services.operations.osb_operations import OsbProject
+from src.services.operations.proxy_operations import ProxyService
+from src.services.operations.pipeline_operations import  Pipeline
+from src.services.operations.business_operations import BusinessService 
+from src.utils import logger_utils
+from src.services.osb_diagram_services import OsbDiagramService
 import logging
-from repository.xml_repository import XmlRepository
+from src.services.operations.xml_operations import XmlOperations
 
 # Inicializamos el logger
-log_config.setup_logging()
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
+
+# Inicializamos las variables de entorno
+load_dotenv() 
 
 class OsbLocalReposService:
     def __init__(self, path):
@@ -48,7 +52,7 @@ class OsbLocalReposService:
 class Services(OsbLocalReposService):
     def get_services_files(self) -> None:
         service_files_repo=[]
-        xml_repository = XmlRepository(self.path)
+        xml_repository = XmlOperations(self.path)
         service_files_repo = xml_repository.get_path_repositories()
         self.create_components_relation(service_files_repo)
 
@@ -61,7 +65,7 @@ class Services(OsbLocalReposService):
         proxy_services = ProxyService('','','','')
         business_service = BusinessService('','','','')
         associate_component = []
-        exclude_services= basic_utils.create_list_from_properties(property_config.read_properties('services', 'exclude'))
+        exclude_services= basic_utils.create_list_from_properties(os.getenv("SERVICES_EXCLUDED"))
         for pipeline_key in pipeline.associated_components:
             if basic_utils.get_file_name(pipeline_key) not in exclude_services:
                 if 'ProxyRef' in pipeline.associated_components[pipeline_key]:

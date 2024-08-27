@@ -1,8 +1,8 @@
-from interfaces.file_interface import FileInterface
-from utils import directory_utils
+from src.services.interfaces.file_interface import FileInterface
+from src.utils import directory_utils
 
 
-class FileRepository(FileInterface):
+class FileOperations(FileInterface):
     def __init__(self, path_dir):
         self.path_dir = path_dir
         

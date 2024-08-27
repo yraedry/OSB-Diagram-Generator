@@ -1,16 +1,17 @@
-from interfaces.osb_interface import OsbInterface
-from repository.proxy_repository import ProxyService
-from repository.pipeline_repository import  Pipeline
-from repository.business_repository import BusinessService
-from utils.logger_config import LoggerConfig as log_config
-from utils import basic_utils
+from src.services.interfaces.osb_interface import OsbInterface
+from src.services.operations.proxy_operations import ProxyService
+from src.services.operations.pipeline_operations import  Pipeline
+from src.services.operations.business_operations import BusinessService
+from src.utils import logger_utils
+from src.utils import basic_utils
 import logging
+
 # Inicializamos el logger
-log_config.setup_logging()
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 
-class OsbRepository(OsbInterface):
+class OsbOperations(OsbInterface):
     def get_project_name(self, project_name):
         return project_name
     

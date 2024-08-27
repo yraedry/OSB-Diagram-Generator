@@ -1,11 +1,11 @@
-from interfaces.proxy_interface import ProxyInterface
-from utils.xml_utils import ProxyXmlContent, XmlCommonContent
-from utils.xml_utils import XmlCommons
-from repository.xml_repository import XmlRepository
-from repository.file_repository import FileRepository
-from utils import basic_utils
+from src.services.interfaces.proxy_interface import ProxyInterface
+from src.utils.xml_utils import ProxyXmlContent, XmlCommonContent
+from src.utils.xml_utils import XmlCommons
+from src.services.operations.xml_operations import XmlOperations
+from src.services.operations.file_operations import FileOperations
+from src.utils import basic_utils
 
-class ProxyRepository(ProxyInterface):
+class ProxyOperations(ProxyInterface):
     def get_name(self, proxy_name):
         return proxy_name
     
@@ -36,10 +36,10 @@ class ProxyService:
         self.is_recursive = False
     
     def create_all_proxy_object(self, repo, path):
-        proxy_repository = ProxyRepository()
+        proxy_repository = ProxyOperations()
         xml_commons = XmlCommons()
-        xml_repository = XmlRepository(path)
-        file_repository = FileRepository(path)
+        xml_repository = XmlOperations(path)
+        file_repository = FileOperations(path)
         proxy_service_list = []
         file_type = 'proxy'
         include_jms_proxy = False
@@ -57,10 +57,10 @@ class ProxyService:
         return proxy_service_list
     
     def create_proxy_object(self, repo, path, proxy_child_name):
-        proxy_repository = ProxyRepository()
+        proxy_repository = ProxyOperations()
         xml_commons = XmlCommons()
-        xml_repository = XmlRepository(path)
-        file_repository = FileRepository(path)
+        xml_repository = XmlOperations(path)
+        file_repository = FileOperations(path)
         file_type = 'proxy'
         proxy_content = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         proxy_name = proxy_repository.get_name(proxy_child_name)

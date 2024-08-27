@@ -1,13 +1,13 @@
 from os import path
 import logging
-from utils.logger_config import LoggerConfig as log_config
-from utils import basic_utils
+from src.utils import logger_utils
+from src.utils import basic_utils
 from drawpyo.diagram_types import TreeDiagram, NodeObject
-from repository.proxy_repository import ProxyService
-from repository.business_repository import BusinessService 
+from src.services.operations.proxy_operations import ProxyService
+from src.services.operations.business_operations import BusinessService 
 
 # Inicializamos el logger
-log_config.setup_logging()
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 EXTERNAL_DEPENDENCY = 'external dependency'

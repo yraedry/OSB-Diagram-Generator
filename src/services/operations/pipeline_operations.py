@@ -1,18 +1,19 @@
-from interfaces.pipeline_interface import PipelineInterface
-from utils.xml_utils import PipelineXmlContent
-from utils.xml_utils import XmlCommons
-from repository.xml_repository import XmlRepository
-from repository.file_repository import FileRepository
-from repository.proxy_repository import ProxyService
-from repository.business_repository import BusinessService 
-from utils.logger_config import LoggerConfig as log_config
-from utils import basic_utils
+from src.services.interfaces.pipeline_interface import PipelineInterface
+from src.utils.xml_utils import PipelineXmlContent
+from src.utils.xml_utils import XmlCommons
+from src.services.operations.xml_operations import XmlOperations
+from src.services.operations.file_operations import FileOperations
+from src.services.operations.proxy_operations import ProxyService
+from src.services.operations.business_operations import BusinessService 
+from src.utils import logger_utils
+from src.utils import basic_utils
 import logging
 
-log_config.setup_logging()
+# Inicializamos el logger
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
 
-class PipelineRepository(PipelineInterface):
+class PipelineOperations(PipelineInterface):
     def get_name(self, pipeline_name):
         return pipeline_name
     
@@ -32,11 +33,11 @@ class Pipeline:
         self.external_jms_component = []
     
     def create_pipeline_object(self, repo, path, proxy, associated_pipeline):
-        pipeline_repository = PipelineRepository()
+        pipeline_repository = PipelineOperations()
         xml_commons = XmlCommons()
         osb_pipeline = PipelineXmlContent()
-        xml_repository = XmlRepository(path)
-        file_repository = FileRepository(path)
+        xml_repository = XmlOperations(path)
+        file_repository = FileOperations(path)
         file_type = 'pipeline'
         pipelines_dict = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)
         check_jms_type = osb_pipeline.find_pipeline_jms_type(pipelines_dict[associated_pipeline])
@@ -51,11 +52,11 @@ class Pipeline:
     
     def create_jms_pipeline_object(self, repo, path, proxy, associated_pipeline):
         pattern = r'JMSType = '
-        pipeline_repository = PipelineRepository()
+        pipeline_repository = PipelineOperations()
         xml_commons = XmlCommons()
         osb_pipeline = PipelineXmlContent()
-        xml_repository = XmlRepository(path)
-        file_repository = FileRepository(path)
+        xml_repository = XmlOperations(path)
+        file_repository = FileOperations(path)
         file_type = 'pipeline'
         jms_types_relations = []
         pipelines_dict = xml_commons.get_xml_values(repo, file_type, xml_repository, file_repository)

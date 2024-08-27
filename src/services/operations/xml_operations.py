@@ -1,8 +1,8 @@
 import os
-from interfaces.xml_interface import XmlInterface
-from utils import directory_utils
+from src.services.interfaces.xml_interface import XmlInterface
+from src.utils import directory_utils
 
-class XmlRepository(XmlInterface):
+class XmlOperations(XmlInterface):
     def __init__(self, path_dir):
         self.path_dir = path_dir
         
@@ -21,7 +21,7 @@ class XmlRepository(XmlInterface):
     
     def get_path_repositories(self):
         osb_services_list = []
-        service_dir = os.path.normpath(f'{self.path_dir}/files/services.txt')
+        service_dir = os.path.normpath(f'{self.path_dir}/src/files/services.txt')
         osb_dir = os.path.normpath(f'{self.path_dir}/cloned_repositories')
         osb_services = open(service_dir, "r")
         for service in osb_services:

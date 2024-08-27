@@ -1,11 +1,11 @@
 import logging
 import xml.etree.ElementTree as ET
-from utils.logger_config import LoggerConfig as log_config
-from utils import basic_utils
-from repository.file_repository import FileRepository
-from repository.xml_repository import XmlRepository
+from src.utils import logger_utils
+from src.utils import basic_utils
+from src.services.operations.file_operations import FileOperations
+from src.services.operations.xml_operations import XmlOperations
 
-log_config.setup_logging()
+logger_utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 class ProxyXmlContent:
@@ -64,7 +64,7 @@ class XmlCommonContent:
             logger.error("uri not found")
         return common_uri_value
 class XmlCommons:
-    def get_xml_values(self, repo, file_type, xml_repository: XmlRepository, file_repository: FileRepository):
+    def get_xml_values(self, repo, file_type, xml_repository: XmlOperations, file_repository: FileOperations):
         xml_content = {}
         xml_path = xml_repository.get_path(repo, file_type)
         xml_name = xml_repository.get_file_path(xml_path, file_type)
