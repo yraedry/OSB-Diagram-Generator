@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 # Inicializamos las variables de entorno
 load_dotenv() 
 
-class GithubRoutes:
+class GithubApi:
     def __init__(self, url):
         self.url = url
     
     def get_all_github_repos(self):
         http_connector = HttpConnector(os.getenv("GITHUB_USER"), os.getenv("GITHUB_TOKEN"), self.url)
-        github_repositories = http_connector.call_repositories_api(f'/users/{os.getenv("GITHUB_USER")} /repos')
+        github_repositories = http_connector.call_repositories_api(f'/search/repositories?q=user:{os.getenv("GITHUB_USER")}')
         return github_repositories
 
     def get_github_repo(self, repo):

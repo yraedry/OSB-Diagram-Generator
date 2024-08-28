@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # Inicializamos las variables de entorno
 load_dotenv() 
 
-class BitBucketRoutes:
+class BitBucketApi:
     def __init__(self, url):
         self.url = url
     

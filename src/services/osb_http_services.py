@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv 
 from src.utils import basic_utils, xml_utils
-from src.routes.bitbucket_routes import BitBucketRoutes
+from services.api.bitbucket_api import BitBucketApi
 from src.utils import logger_utils
 from src.services.osb_diagram_services import OsbDiagramService
 import logging
@@ -23,7 +23,7 @@ class OsbHttpService:
         # Metodo para obtener los repositorios que elijamos por parametro y poder listarlos en un dropdownlist
         services_repo=[]
         services_allowed = basic_utils.create_list_from_properties(os.getenv("SERVICES_START_NAME"))
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         response_api = request_bitbucket.get_bitbucket_repos()
         for line in response_api['values']:
             if len(services_allowed) > 0 and services_allowed[0] != '': 
@@ -38,7 +38,7 @@ class OsbHttpService:
         
     def get_services_files(self, repo):
         service_files_repo=[]
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         response_api = request_bitbucket.get_bitbucket_files(repo)
         for line in response_api['values']:
             if line.endswith('.proxy'):
@@ -85,7 +85,7 @@ class OsbHttpService:
             osb_diagram.osb_jms_diagram(repo, proxy_components, pipeline_components, business_components, proxy_jms_type_relations, pipeline_jms_type_relations)
         
     def get_proxy_relations(self, repo, components):
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         proxy_components_relations={}
         for component in components:
             response_api = request_bitbucket.get_bitbucket_component(repo, component)
@@ -95,7 +95,7 @@ class OsbHttpService:
         return proxy_components_relations
     
     def get_pipelines_relations(self, repo, pipeline_name):
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         pipeline_relations_list =[]
         exclude_services= basic_utils.create_list_from_properties(os.getenv("SERVICES_EXCLUDED"))
         pipeline_components_relations={}
@@ -122,7 +122,7 @@ class OsbHttpService:
         return pipeline_components_relations
 
     def get_business_relations(self, repo, business_name):
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         business_components_relations={}
         response_api = request_bitbucket.get_bitbucket_component(repo, business_name)
         if('errors' not in response_api):
@@ -134,7 +134,7 @@ class OsbHttpService:
 
     def create_file_bitbucket_repos(self) -> None:
         # Metodo para obtener los repositorios que elijamos por parametro y guardarlos en un fichero
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         services_allowed = basic_utils.create_list_from_properties(os.getenv("SERVICES_START_NAME"))
         response_api = request_bitbucket.get_bitbucket_repos()
         service_dir = os.path.normpath(os.getcwd() + os.sep + os.pardir + "/files")
@@ -151,7 +151,7 @@ class OsbHttpService:
     def browse_bitbucket_repo(self, repos) -> None:
         # Metodo para obtener los ficheros de los repositorios (metodo simple)
         components_repo = []
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT")) 
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT")) 
         get_repo = request_bitbucket.get_bitbucket_repos()
         for component in get_repo['values']:
             extension = os.path.splitext(component)
@@ -159,7 +159,7 @@ class OsbHttpService:
                 components_repo.append(component) 
     
     def get_jms_type_pipeline(self, repo, component, proxy_type):
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         jms_types_dict = {}
         jms_types_list = []
         response_api = request_bitbucket.get_bitbucket_component(repo, component)
@@ -175,7 +175,7 @@ class OsbHttpService:
         return jms_types_dict
 
     def get_type_proxies(self, repo, components):
-            request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+            request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
             jms_type_proxy_dict = {}
             pattern = r'JMSType = '
             for component in components:
@@ -187,7 +187,7 @@ class OsbHttpService:
             return jms_type_proxy_dict    
         
     def get_jms_type_proxy(self, repo, component):
-        request_bitbucket = BitBucketRoutes(os.getenv("BITBUCKET_ENDPOINT"))
+        request_bitbucket = BitBucketApi(os.getenv("BITBUCKET_ENDPOINT"))
         jms_type_proxy_dict = {}
         pattern = r'JMSType = '
         response_api = request_bitbucket.get_bitbucket_component(repo, component)

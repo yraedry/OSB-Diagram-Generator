@@ -18,7 +18,7 @@ class BusinessOperations(BusinessInterface):
         business_type = common_content.find_type(business_file)
         return business_type
         
-class BusinessService:
+class BusinessServiceLocal:
     def __init__(self, pipeline_name_relation, business_name, business_uri, business_type):
         self.pipeline_name_relation = pipeline_name_relation
         self.business_name = business_name
@@ -40,10 +40,25 @@ class BusinessService:
         else:
             business_type = business_repository.get_type(business_content[business_child_name])
             business_uri = business_repository.get_uri(business_content[business_child_name])
-        business = BusinessService(pipeline_name, business_name, business_uri, business_type)
+        business = BusinessServiceLocal(pipeline_name, business_name, business_uri, business_type)
         return business
         
     def add_business_to_pipeline(self, pipeline, business_service):
         pipeline.add_business(business_service)
         return pipeline
     
+class BusinessService:
+    def __init__(self, pipeline_name_relation, business_name, business_uri, business_type):
+        self.pipeline_name_relation = pipeline_name_relation
+        self.business_name = business_name
+        self.business_uri = business_uri
+        self.business_type = business_type
+    
+    def create_business_object(self, repo, path, pipeline_name, business_child_name):
+        pass
+
+
+class BusinessServiceCommons(BusinessServiceLocal, BusinessService):       
+    def add_business_to_pipeline(self, pipeline, business_service):
+        pipeline.add_business(business_service)
+        return pipeline

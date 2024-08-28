@@ -1,7 +1,4 @@
 from src.services.interfaces.osb_interface import OsbInterface
-from src.services.operations.proxy_operations import ProxyService
-from src.services.operations.pipeline_operations import  Pipeline
-from src.services.operations.business_operations import BusinessService
 from src.utils import logger_utils
 from src.utils import basic_utils
 import logging
@@ -25,7 +22,7 @@ class OsbOperations(OsbInterface):
         return business_service
     
 
-class OsbProject(ProxyService, Pipeline, BusinessService):
+class OsbProject():
     def __init__(self, project):
         self.project = project
     
@@ -51,4 +48,3 @@ class OsbProject(ProxyService, Pipeline, BusinessService):
         for no_relation_proxy_index in no_relation_proxy_indexs:
             project.append(osb_components_lists[no_relation_proxy_index])
         return project
-                

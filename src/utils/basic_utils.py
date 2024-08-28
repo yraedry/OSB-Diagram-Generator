@@ -75,3 +75,6 @@ def get_node_color(file_path):
     elif get_last_part_value_from_character('.', file_path) == 'bix':
         node_color = '#ffe6cc'
     return node_color
+
+def string_to_json(string_value):
+    return json.loads(string_value)

@@ -3,8 +3,8 @@ import logging
 from src.utils import logger_utils
 from src.utils import basic_utils
 from drawpyo.diagram_types import TreeDiagram, NodeObject
-from src.services.operations.proxy_operations import ProxyService
-from src.services.operations.business_operations import BusinessService 
+from src.services.operations.proxy_operations import ProxyServiceLocal
+from src.services.operations.business_operations import BusinessServiceLocal 
 
 # Inicializamos el logger
 logger_utils.setup_logging()
@@ -52,13 +52,13 @@ class OsbDiagramService:
     
     def create_recursive_subchilds_objects(self, recursive_tree, pipeline_child, parent_value):
         for check_type_component in pipeline_child:
-            if isinstance(check_type_component, ProxyService) and check_type_component.pipeline_relation != EXTERNAL_DEPENDENCY:
+            if isinstance(check_type_component, ProxyServiceLocal) and check_type_component.pipeline_relation != EXTERNAL_DEPENDENCY:
                 proxy_value =NodeObject(tree=recursive_tree, value=check_type_component.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)
                 pipeline_value = NodeObject(tree=recursive_tree, value=check_type_component.pipeline_relation, parent=proxy_value, fillColor='#d5e8d4', width = 180)
                 recursive_tree = self.create_recursive_subchilds_objects(recursive_tree, check_type_component.pipeline, pipeline_value)
-            if isinstance(check_type_component, ProxyService) and check_type_component.pipeline_relation == EXTERNAL_DEPENDENCY:
+            if isinstance(check_type_component, ProxyServiceLocal) and check_type_component.pipeline_relation == EXTERNAL_DEPENDENCY:
                 NodeObject(tree=recursive_tree, value=check_type_component.proxy_name, base_style="rounded", parent=parent_value, fillColor='#dae8fc', width = 180)
-            elif isinstance(check_type_component, BusinessService):
+            elif isinstance(check_type_component, BusinessServiceLocal):
                 NodeObject(tree=recursive_tree, value=check_type_component.business_name, base_style="rounded", parent=parent_value, fillColor='#ffe6cc', width = 180)  
         return recursive_tree
         
