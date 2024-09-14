@@ -7,7 +7,7 @@ class XmlOperations(XmlInterface):
         self.path_dir = path_dir
         
     def get_path(self, repo, file_type):
-        repository_path = os.path.normpath(f'{self.path_dir}/cloned_repositories/{repo}')
+        repository_path = os.path.normpath("{dir_path}/cloned_repositories/{repository}".format(dir_path = self.path_dir, repository = repo))
         path = directory_utils.get_folder_path(repository_path, file_type)
         return path
     
@@ -21,10 +21,10 @@ class XmlOperations(XmlInterface):
     
     def get_path_repositories(self):
         osb_services_list = []
-        service_dir = os.path.normpath(f'{self.path_dir}/src/files/services.txt')
-        osb_dir = os.path.normpath(f'{self.path_dir}/cloned_repositories')
+        service_dir = os.path.normpath('{dir_path}/src/files/services.txt'.format(dir_path = self.path_dir))
+        osb_dir = os.path.normpath('{dir_path}/cloned_repositories'.format(dir_path = self.path_dir))
         osb_services = open(service_dir, "r")
         for service in osb_services:
-            osb_services_list.append(os.path.normpath(f'{osb_dir}/{service.replace("\n", "")}'))
+            osb_services_list.append(os.path.normpath('{dir}/{replace_service}'.format(dir = osb_dir, replace_service = service.replace("\n", ""))))
         return osb_services_list
     
